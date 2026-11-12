@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="TestNull FLRS1X1" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="TestFuzzy.TestNullFLRS.FLRS1X1" />
+    <module name="All_Petri_FW" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

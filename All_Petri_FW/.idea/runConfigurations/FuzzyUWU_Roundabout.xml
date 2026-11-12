@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FuzzyUWU Roundabout" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="FuzzyUWU.RoundaboutModel" />
+    <option name="PROGRAM_PARAMETERS" value="1100 1082 0.4 0.2" />
+    <module name="All_Petri_FW" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

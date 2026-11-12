@@ -11,21 +11,7 @@ import Enumerations.FZ;
 public class FuzzyVector implements Serializable {
 	public ArrayList<FuzzyVectorValue> Values = new ArrayList<FuzzyVectorValue>();
 
-    @Override
-    public boolean equals(Object o) {
-
-        if (!(o instanceof FuzzyVector))
-            return false;
-
-        FuzzyVector Temp = ((FuzzyVector) o);
-
-        if (!Temp.toString().equals( this.toString()))
-            return false;
-
-        return true;
-    }
-
-    public FuzzyVector(Float NL, Float NM, Float ZR, Float PM, Float PL) {
+	public FuzzyVector(Float NL, Float NM, Float ZR, Float PM, Float PL) {
 		Values.add(new FuzzyVectorValue(FZ.NL, NL));
 		Values.add(new FuzzyVectorValue(FZ.NM, NM));
 		Values.add(new FuzzyVectorValue(FZ.ZR, ZR));

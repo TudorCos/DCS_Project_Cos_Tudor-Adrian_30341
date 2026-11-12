@@ -1,4 +1,4 @@
-package DCS_OETPN_UVS;
+package DCS_UVS;
 import Components.Activation;
 import Components.Condition;
 import Components.GuardMapping;

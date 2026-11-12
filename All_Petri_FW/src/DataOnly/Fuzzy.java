@@ -32,18 +32,22 @@ public class Fuzzy implements Cloneable, Serializable {
 		return "(" + Value.toString() + ": " + Vector.toString() + ")";
 	}
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Fuzzy)) {
-            return false;
-        }
-        Fuzzy Temp = ((Fuzzy) o);
-        if (!Temp.Value.equals(this.Value))
-            return false;
-        if (!Temp.Vector.equals(this.Vector))
-            return false;
-        return true;
-    }
+	@Override
+	public boolean equals(Object other) {
+		if (this == other)
+			return true;
+		if (!(other instanceof Fuzzy))
+			return false;
+		Fuzzy fuzzy = (Fuzzy) other;
+		if (Value == null || fuzzy.Value == null)
+			return Value == fuzzy.Value;
+		return Float.compare(Value, fuzzy.Value) == 0;
+	}
+
+	@Override
+	public int hashCode() {
+		return Value == null ? 0 : Float.hashCode(Value);
+	}
 
 	public void GenerateFuzzyToken(Float v) {
 		Vector.GenerateFuzzyToken(v);

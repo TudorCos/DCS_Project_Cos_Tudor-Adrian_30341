@@ -20,16 +20,9 @@ import Enumerations.TransitionCondition;
 import Enumerations.TransitionOperation;
 
 public class FLRS1X1 {
-    // Input columns: NL, NM, ZR, PM, PL. Preserve each input label.
-    public static FLRS identityRules() {
-        return new FLRS(new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR),
-                        new FV(FZ.PM), new FV(FZ.PL));
-    }
-
 	
 	public static void main (String [] args) throws FileNotFoundException {
-		
-		FLRS flrs1x1 = identityRules();
+				FLRS flrs1x1 = new FLRS(new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL));
 
 		flrs1x1.Print();
 		
@@ -37,10 +30,10 @@ public class FLRS1X1 {
 		pn.PetriNetName = "Main Petri";
 		pn.NetworkPort = 1081;
 
-		// Use an initial token so no machine-specific input file is needed.
+		pn.SetInputFile("F:\\DCS project\\Location\\test3.txt");
 		DataFuzzy p1 = new DataFuzzy();
 		p1.SetName("P1");
-		p1.SetValue(new Fuzzy(0.1F));
+		//p1.SetValue(new Fuzzy(0.1F));
 		pn.PlaceList.add(p1);
 
 		DataFuzzy p2 = new DataFuzzy();

@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FuzzyUWU Exit Lane 2" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="FuzzyUWU.ExitLaneModel" />
+    <option name="PROGRAM_PARAMETERS" value="2 1092 1100" />
+    <module name="All_Petri_FW" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

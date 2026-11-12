@@ -19,20 +19,13 @@ import Enumerations.TransitionCondition;
 import Enumerations.TransitionOperation;
 
 public class FLRS2X1 {
-    // Copied from DCS_FuzzyLab.OETPN_C.PIController.reader.
-    // Rows are P1, columns are P2: every row returns P2's label.
-    public static FLRS readerRules() {
-        return new FLRS(
-            new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
-            new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
-            new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
-            new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
-            new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL));
-    }
-
 	public static void main (String []args) {
 		
-		FLRS flrs2x1 = readerRules();
+		FLRS flrs2x1 = new FLRS(new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
+	   			new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
+	   			new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
+	   			new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM), new FV(FZ.PL),
+	   			new FV(FZ.NL), new FV(FZ.NM), new FV(FZ.ZR), new FV(FZ.PM),	new FV(FZ.PL));
 
 		flrs2x1.Print();
 		
@@ -69,7 +62,7 @@ public class FLRS2X1 {
 
 				ArrayList<PlaceNameWithWeight> input = new ArrayList<>();
 				input.add(new PlaceNameWithWeight("P1", 1F));
-				input.add(new PlaceNameWithWeight("P2", 1F));
+				input.add(new PlaceNameWithWeight("P2", -1F));
 
 				
 				ArrayList<String> Output = new ArrayList<>();

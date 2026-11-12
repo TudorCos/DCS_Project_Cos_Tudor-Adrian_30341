@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FuzzyUWU Lane 1" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="FuzzyUWU.LaneModel" />
+    <module name="All_Petri_FW" />
+    <option name="PROGRAM_PARAMETERS" value="1 1081 1080 0.8" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
