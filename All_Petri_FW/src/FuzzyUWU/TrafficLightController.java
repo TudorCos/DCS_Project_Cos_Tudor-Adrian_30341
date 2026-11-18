@@ -10,7 +10,6 @@ import Enumerations.LogicConnector;
 import Enumerations.TransitionCondition;
 import Enumerations.TransitionOperation;
 
-/** One green lane at a time, with a yellow interval between green phases. */
 public class TrafficLightController {
     public static final int FIRST_LANE_PORT = 1081;
     public static final int SIGNAL_SECONDS = 5;
