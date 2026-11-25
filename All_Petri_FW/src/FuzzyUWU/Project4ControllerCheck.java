@@ -45,7 +45,7 @@ public class Project4ControllerCheck {
             net.PlaceList.set(index,recorder); outputs[lane-1]=recorder;
             if(!original.Value.Port.equals(Integer.toString(1080+lane)) ||
                !original.Value.TargetPlaceName.equals("P_TL"+lane)) throw new AssertionError("Wrong lane destination");
-            DataInteger d=(DataInteger)net.util.GetPetriObjectByName("d"+lane,net.ConstantPlaceList);
+            DataInteger d=(DataInteger)net.util.GetPetriObjectByName("d"+lane,net.PlaceList);
             if(d.Value!=5) throw new AssertionError("Missing five-second duration");
         }
         fire(net,"t_initialize"); expect(outputs,new int[]{-1,-1,-1,-1});
@@ -55,16 +55,31 @@ public class Project4ControllerCheck {
             fire(net,"t_yellow"+lane);
             int[] yellow={-1,-1,-1,-1}; yellow[lane-1]=1; expect(outputs,yellow);
             if(lane==2) {
-                DataInteger d=(DataInteger)net.util.GetPetriObjectByName("d2",net.ConstantPlaceList);
+                DataInteger d=(DataInteger)net.util.GetPetriObjectByName("d2",net.PlaceList);
                 d.SetValue(7);
-                // DynamicDelay reads at firing; repeat the transition on the next cycle below.
+                // The next green phase for lane 2 should use the new duration when booked.
             }
-            int next=lane==4?1:lane+1;
-            fire(net,"t_green"+next+"_after"+lane);
-            int[] green={-1,-1,-1,-1}; green[next-1]=0; expect(outputs,green);
+            if (lane < 4) {
+                int next = lane + 1;
+                fire(net,"t_green"+next+"_after"+lane);
+                int[] green={-1,-1,-1,-1}; green[next-1]=0; expect(outputs,green);
+            }
         }
-        fire(net,"t_yellow1"); fire(net,"t_green2_after1"); fire(net,"t_yellow2");
-        if(transition(net,"t_yellow2").Delay!=7) throw new AssertionError("DynamicDelay ignored d2");
-        System.out.println("Controller phases, all four signals, destinations, cycle, and dynamic delay passed.");
+        if (transition(net,"t_all_red_after4").Delay != 5)
+            throw new AssertionError("Lane 4 should stay yellow for five ticks");
+        fire(net,"t_all_red_after4");
+        expect(outputs,new int[]{-1,-1,-1,-1});
+        net.ExecutionList = new ArrayList<>();
+        net.CheckTransitions();
+        PetriTransition restart = transition(net,"t_green1");
+        if (net.ExecutionList.size() != 1 || net.ExecutionList.get(0) != restart || restart.InitialDelay != 5)
+            throw new AssertionError("Lane 1 should wait five ticks after lane 4 goes red");
+        restart.Activate();
+        expect(outputs,new int[]{0,-1,-1,-1});
+        fire(net,"t_yellow1"); fire(net,"t_green2_after1");
+        net.ExecutionList = new ArrayList<>();
+        net.CheckTransitions();
+        if(transition(net,"t_yellow2").InitialDelay!=7) throw new AssertionError("Scheduler ignored d2");
+        System.out.println("Controller phases, all four signals, destinations, all-red interval, and dynamic delay passed.");
     }
 }

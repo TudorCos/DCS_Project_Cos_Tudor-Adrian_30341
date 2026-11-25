@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="FuzzyUWU Supervisor" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="FuzzyUWU.TrafficSupervisor" />
+    <module name="All_Petri_FW" />
+    <option name="PROGRAM_PARAMETERS" value="1101 1102" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -12,13 +12,18 @@ import Enumerations.TransitionOperation;
 
 public class TrafficLightController {
     public static final int FIRST_LANE_PORT = 1081;
+    public static final int NETWORK_PORT = 1102;
     public static final int SIGNAL_SECONDS = 5;
 
     public static PetriNet build(int firstLanePort) {
+        return build(firstLanePort, NETWORK_PORT);
+    }
+
+    public static PetriNet build(int firstLanePort, int controllerPort) {
         PetriNet pn = new PetriNet();
         pn.PetriNetName = "Fuzzy traffic-light controller";
         pn.SetName("TrafficController");
-        pn.NetworkPort = 0;
+        pn.NetworkPort = controllerPort;
         pn.Delay = 1000;
         pn.PlaceList.add(FuzzyModelSupport.fuzzyPlace("Initialize", 0F));
         pn.PlaceList.add(FuzzyModelSupport.fuzzyPlace("AllRed"));
@@ -28,7 +33,7 @@ public class TrafficLightController {
             DataInteger duration = new DataInteger();
             duration.SetName("d" + lane);
             duration.SetValue(SIGNAL_SECONDS);
-            pn.ConstantPlaceList.add(duration);
+            pn.PlaceList.add(duration);
             pn.PlaceList.add(FuzzyModelSupport.transfer("TL_out" + lane,
                     firstLanePort + lane - 1, "P_TL" + lane));
         }
@@ -39,30 +44,43 @@ public class TrafficLightController {
         PetriTransition initialize = phase(pn, "t_initialize", "Initialize", "AllRed", 0);
         for (int lane = 1; lane <= 4; lane++) signal(initialize, lane, "Red");
 
-        PetriTransition firstGreen = phase(pn, "t_green1", "AllRed", "Lane1Green", SIGNAL_SECONDS);
-        signal(firstGreen, 1, "Green");
+        PetriTransition laneOneGreen = phase(pn, "t_green1", "AllRed", "Lane1Green", SIGNAL_SECONDS);
+        signal(laneOneGreen, 1, "Green");
         for (int lane = 1; lane <= 4; lane++) {
             String green = "Lane" + lane + "Green";
             String yellow = "Lane" + lane + "Yellow";
-            PetriTransition startYellow = phase(pn, "t_yellow" + lane, green, yellow, SIGNAL_SECONDS);
+            String duration = "d" + lane;
+            PetriTransition startYellow = new PetriTransition(pn) {
+                @Override
+                public void BookTokens() throws CloneNotSupportedException {
+                    super.BookTokens();
+                    // The scheduler snapshots Delay immediately after booking the green token.
+                    DataInteger setting = (DataInteger) util.GetPetriObjectByName(duration, Parent.PlaceList);
+                    Delay = setting.Value;
+                }
+            };
+            phase(startYellow, "t_yellow" + lane, green, yellow, SIGNAL_SECONDS);
             startYellow.GuardMappingList.get(0).condition.SetNextCondition(LogicConnector.AND,
-                    new Condition(startYellow, "d" + lane, TransitionCondition.NotNull));
+                    new Condition(startYellow, duration, TransitionCondition.NotNull));
             signal(startYellow, lane, "Yellow");
-            // DynamicDelay reads dN when this transition fires. The framework applies
-            // it to its next firing; its initial Delay is SIGNAL_SECONDS as well.
-            startYellow.GuardMappingList.get(0).Activations.add(
-                    new Activation(startYellow, "d" + lane, TransitionOperation.DynamicDelay, ""));
-            int next = lane == 4 ? 1 : lane + 1;
-            PetriTransition startGreen = phase(pn, "t_green" + next + "_after" + lane,
-                    yellow, "Lane" + next + "Green", SIGNAL_SECONDS);
-            signal(startGreen, lane, "Red");
-            signal(startGreen, next, "Green");
+            if (lane < 4) {
+                int next = lane + 1;
+                PetriTransition startGreen = phase(pn, "t_green" + next + "_after" + lane,
+                        yellow, "Lane" + next + "Green", SIGNAL_SECONDS);
+                signal(startGreen, lane, "Red");
+                signal(startGreen, next, "Green");
+            }
         }
+        PetriTransition allRed = phase(pn, "t_all_red_after4", "Lane4Yellow", "AllRed", SIGNAL_SECONDS);
+        signal(allRed, 4, "Red");
         return pn;
     }
 
     private static PetriTransition phase(PetriNet pn, String name, String from, String to, int delay) {
-        PetriTransition transition = new PetriTransition(pn);
+        return phase(new PetriTransition(pn), name, from, to, delay);
+    }
+
+    private static PetriTransition phase(PetriTransition transition, String name, String from, String to, int delay) {
         transition.TransitionName = name;
         transition.InputPlaceName.add(from);
         GuardMapping guard = new GuardMapping();
@@ -71,7 +89,7 @@ public class TrafficLightController {
                 FuzzyModelSupport.fuzzyInputs(from), TransitionOperation.FLRS, FuzzyModelSupport.outputs(to)));
         transition.GuardMappingList.add(guard);
         transition.Delay = delay;
-        pn.Transitions.add(transition);
+        transition.Parent.Transitions.add(transition);
         return transition;
     }
 
@@ -82,6 +100,7 @@ public class TrafficLightController {
 
     public static void main(String[] args) {
         int firstLanePort = args.length > 0 ? Integer.parseInt(args[0]) : FIRST_LANE_PORT;
-        FuzzyModelSupport.show(build(firstLanePort));
+        int controllerPort = args.length > 1 ? Integer.parseInt(args[1]) : NETWORK_PORT;
+        FuzzyModelSupport.show(build(firstLanePort, controllerPort));
     }
 }

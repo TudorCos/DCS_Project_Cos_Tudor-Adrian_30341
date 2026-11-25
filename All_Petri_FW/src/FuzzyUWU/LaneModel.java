@@ -17,6 +17,11 @@ public class LaneModel {
 	public static final int FIRST_LANE_PORT = 1081;
 
 	public static PetriNet build(int laneNumber, int networkPort, int intersectionPort, Float initialFlow) {
+		return build(laneNumber, networkPort, intersectionPort, initialFlow, 0);
+	}
+
+	public static PetriNet build(int laneNumber, int networkPort, int intersectionPort, Float initialFlow,
+			int supervisorPort) {
 		if (laneNumber < 1 || laneNumber > 4)
 			throw new IllegalArgumentException("laneNumber must be between 1 and 4");
 
@@ -44,6 +49,27 @@ public class LaneModel {
 		pn.PlaceList.add(trafficLight);
 		pn.PlaceList.add(output);
 
+		String laneInput = inputFlow.GetName();
+		if (supervisorPort != 0) {
+			String supervisorOutput = "Flow_to_supervisor" + suffix;
+			laneInput = "Reported_flow" + suffix;
+			pn.PlaceList.add(FuzzyModelSupport.fuzzyPlace(laneInput));
+			pn.PlaceList.add(FuzzyModelSupport.transfer(supervisorOutput, supervisorPort, "f" + suffix));
+
+			PetriTransition report = new PetriTransition(pn);
+			report.TransitionName = "t_report" + suffix;
+			report.Delay = 0;
+			report.InputPlaceName.add(inputFlow.GetName());
+			GuardMapping reportGuard = new GuardMapping();
+			reportGuard.condition = FuzzyModelSupport.allNotNull(report, inputFlow.GetName());
+			reportGuard.Activations.add(new Activation(report, inputFlow.GetName(), TransitionOperation.Move,
+					laneInput));
+			reportGuard.Activations.add(new Activation(report, inputFlow.GetName(), TransitionOperation.SendOverNetwork,
+					supervisorOutput));
+			report.GuardMappingList.add(reportGuard);
+			pn.Transitions.add(report);
+		}
+
 		DataFuzzy green = FuzzyModelSupport.fuzzyPlace("Green", 0F);
 		green.Printable = false;
 		pn.ConstantPlaceList.add(green);
@@ -53,13 +79,13 @@ public class LaneModel {
 
 		PetriTransition tIn = new PetriTransition(pn);
 		tIn.TransitionName = "t_in" + suffix;
-		tIn.InputPlaceName.add(inputFlow.GetName());
+		tIn.InputPlaceName.add(laneInput);
 		if (roundaboutFlow != null)
 			tIn.InputPlaceName.add(roundaboutFlow.GetName());
 		GuardMapping inGuard = new GuardMapping();
 		inGuard.condition = roundaboutFlow == null
-				? FuzzyModelSupport.allNotNull(tIn, inputFlow.GetName())
-				: FuzzyModelSupport.allNotNull(tIn, roundaboutFlow.GetName(), inputFlow.GetName());
+				? FuzzyModelSupport.allNotNull(tIn, laneInput)
+				: FuzzyModelSupport.allNotNull(tIn, roundaboutFlow.GetName(), laneInput);
 		inGuard.Activations.add(new Activation(tIn, laneInputRules,
 				FuzzyModelSupport.fuzzyInputs(tIn.InputPlaceName.toArray(new String[0])),
 				TransitionOperation.FLRS, FuzzyModelSupport.outputs(lane.GetName())));
@@ -102,6 +128,7 @@ public class LaneModel {
 		int networkPort = args.length > 1 ? Integer.parseInt(args[1]) : FIRST_LANE_PORT + laneNumber - 1;
 		int intersectionPort = args.length > 2 ? Integer.parseInt(args[2]) : INTERSECTION_PORT;
 		Float initialFlow = args.length > 3 ? Float.valueOf(args[3]) : 0.8F;
-		FuzzyModelSupport.show(build(laneNumber, networkPort, intersectionPort, initialFlow));
+		int supervisorPort = args.length > 4 ? Integer.parseInt(args[4]) : 0;
+		FuzzyModelSupport.show(build(laneNumber, networkPort, intersectionPort, initialFlow, supervisorPort));
 	}
 }
